@@ -1,0 +1,15 @@
+﻿  stdafx.cpp
+  RedBlackTree.h
+  Source.cpp
+c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(14): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(94): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(86): warning C4018: '<': signed/unsigned mismatch
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(77): note: while compiling class template member function 'void RedBlackTree<long,long>::NodeContainer::Reserve(unsigned int)'
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(693): note: see reference to function template instantiation 'void RedBlackTree<long,long>::NodeContainer::Reserve(unsigned int)' being compiled
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(146): note: see reference to class template instantiation 'RedBlackTree<long,long>::NodeContainer' being compiled
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(113): note: see reference to class template instantiation 'RedBlackTree<long,long>' being compiled
+c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(53): warning C4018: '<': signed/unsigned mismatch
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(52): note: while compiling class template member function 'void RedBlackTree<long,long>::NodeContainer::Release(void)'
+  c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(69): note: see reference to function template instantiation 'void RedBlackTree<long,long>::NodeContainer::Release(void)' being compiled
+  Generating Code...
+  CollectionsImpl(C++).vcxproj -> C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(C++)\Debug\CollectionsImpl(C++).exe
