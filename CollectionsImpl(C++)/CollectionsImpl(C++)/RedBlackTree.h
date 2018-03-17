@@ -897,7 +897,7 @@ public:
 	key.*/
 	iterator Find(U& _key)
 	{
-		Node* node = Find(_key);
+		Node* node = FindNode(_key);
 		if (node == nullptr)
 		{
 			return End();

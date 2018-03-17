@@ -1,4 +1,6 @@
-﻿  Source.cpp
+﻿  stdafx.cpp
+  RedBlackTree.h
+  Source.cpp
 c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
 c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(95): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
 c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(122): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
@@ -14,4 +16,5 @@ c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c+
   c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(872): note: see reference to function template instantiation 'void RedBlackTree<long,long>::NodeContainer::Reserve(unsigned int)' being compiled
   c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\redblacktree.h(176): note: see reference to class template instantiation 'RedBlackTree<long,long>::NodeContainer' being compiled
   c:\users\andre\onedrive\documents\visual studio 2017\projects\collectionsimpl(c++)\collectionsimpl(c++)\source.cpp(114): note: see reference to class template instantiation 'RedBlackTree<long,long>' being compiled
+  Generating Code...
   CollectionsImpl(C++).vcxproj -> C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(C++)\Debug\CollectionsImpl(C++).exe
