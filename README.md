@@ -1,13 +1,17 @@
- The en
-# Collection-Implementations
-This contains implementations of containers I made either for classwork or for on my own time.
 
-2/25/2018 - RedBlackTree
---------------------------
+# Collection-Implementations
+This contains implementations of containers I made on my own time.
+
+3/17/2018 - RedBlackTree(C++)
+------------------------
+I reworked the find method, added contains method, a method to print all the elements in order, and a method to return a sorted heap array of both the keys an the elements (of course,they are copied so that no change is done to the tree itself). I also reworked the iterator to do more preconditional checking and throw more exceptions when it fails.
+
+2/25/2018 - RedBlackTree(C++)
+------------------------
 This was also something I did in inspiration of the ringbuffer assignment I had for my first programming class at UT Austin. This was written in C++. Although the container is unfinished as it lacks a remove method and a output stream method to show the contents in order,
 It comes with a guaranteed logarithmic time min and max functions for both the key and value. It also has functions like reserve and trim excess to give users control over how much capacity they want to set aside.The Insert is also guaranteed logarithmic time.
 
-12/30/2017 - PriorityQueue
+12/30/2017 - PriorityQueue(C#)
 --------------------------
 It took me a month to implement this before scrapping my initial approach which was still valid but much slower than the current 
 implementation.This was done entirely on my free time due to the inspiration I got from the RingBuffer class I had to write for my Intro to Programming class I had last fall semester. The enqueue is in constant time,while both dequeue and contains are in linear time since this implementation didn't contain nodes.
