@@ -1,8 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include <vector>
+#include <unordered_set>
 #include <stdexcept>
 #include <iostream>
+#include <tuple>
 
 /*T is the data type of the contents the tree holds, while
 U is the data type of what the tree uses for node keys.*/
@@ -31,7 +32,7 @@ class RedBlackTree
 			std::cout << "Constructing Node..." << std::endl;
 		}*/
 		Node() = default;
-		//~Node() = default;
+		~Node() = default;
 		Node(Node&& other) = default;
 
 		/*~Node()
@@ -45,14 +46,18 @@ class RedBlackTree
 		Node* first = nullptr;
 		size_t size = 0;
 		size_t capacity;
+		std::unordered_set<int> non_constructed_vals;
 
 		/*Frees up dynamically allocated resources.Deconstructors are called
 		  only on memory that has been constructed.*/
 		void Release()
 		{
-			for (int i = 0;i < size;i++)
+			for (int i = 0;i < size + non_constructed_vals.size();i++)
 			{
-				(first + i)->~Node();
+				if (non_constructed_vals.find(i) == non_constructed_vals.end())
+				{
+					(first + i)->~Node();
+				}
 			}
 			delete(first);
 		}
@@ -81,11 +86,16 @@ class RedBlackTree
 					"capacity must be greater than zero");
 			}
 			Node* temp = (Node*)::operator new(cap * sizeof(Node));
+			int index = 0;
 			if (first != nullptr)
 			{
-				for (int i = 0;i < size;i++)
+				for (int i = 0;i < size + non_constructed_vals.size();i++)
 				{
-					new(temp + i) Node(std::move(*(first + i)));
+					if (non_constructed_vals.find(i) == non_constructed_vals.end())
+					{
+						new(temp + index) Node(std::move(*(first + i)));
+						index++;
+					}
 				}
 				Release();
 			}
@@ -106,9 +116,28 @@ class RedBlackTree
 			if (size == capacity)
 			{
 				Reserve(capacity * 2);
-			}	
-			new(first + size) Node(std::move(node));
+			}
+			if (non_constructed_vals.size() == 0)
+			{
+				new(first + size) Node(std::move(node));
+			}
+			else
+			{
+				std::unordered_set<int>::iterator iter = non_constructed_vals.begin();
+				new(first + *iter) Node(std::move(node));
+				non_constructed_vals.erase(iter);
+			}
 			size++;
+		}
+
+		void Remove(int index)
+		{
+			nodes[index].~Node();
+			size--;
+			if (index < size)
+			{
+				non_constructed_vals.erase(index);
+			}
 		}
 
 		Node& operator[](unsigned int position)
@@ -138,6 +167,7 @@ class RedBlackTree
 					(first + i)->~Node();
 				}
 				size = 0;
+				non_constructed_vals.clear();
 			}
 		}
 	};
@@ -186,6 +216,100 @@ class RedBlackTree
 			}
 			node.parent_index = prev_place;
 		}
+	}
+
+	/*bool InitiallyDelete(U& key)
+	{
+		Node* node = SearchNode(key);
+		if (node == nullptr)
+		{
+			return false;
+		}
+		else
+		{
+			if (node->left_index == Node::NIL
+				&& node->right_index == Node::NIL)
+			{
+
+			}
+			else if (node->left_index == Node::NIL
+				|| node->right_index == Node::NIL)
+			{
+				Node* parent = &nodes[node->parent_index];
+				if (parent->key >= node->key)
+				{
+					if (node->left_index != Node::NIL)
+					{
+						parent->left_index = node->left_index;
+						Node* child = nodes[node->left_index];
+						child->parent_index = node->parent_index;
+					}
+					else
+					{
+						parent->left_index = node->right_index;
+						Node* child = nodes[node->right_index];
+						child->parent_index = node->parent_index;
+					}
+				}
+				else
+				{
+					if (node->left_index != Node::NIL)
+					{
+						parent->right_index = node->left_index;
+						Node* child = nodes[node->left_index];
+						child->parent_index = node->parent_index;
+					}
+					else
+					{
+						parent->right_index = node->right_index;
+						Node* child = nodes[node->right_index];
+						child->parent_index = node->parent_index;
+					}
+				}
+			}
+			else
+			{
+				Node* successor = InOrderSuccessor(node->index;
+				if (successor.right_index != Node::NIL)
+				{
+					Node* right = &nodes[successor->right_index];
+					right->parent_index = successor->parent_index;
+					if (successor->parent_index != Node::NIL)
+					{
+						Node* sparent = &nodes[successor->parent_index];
+					}
+				}
+			}
+			nodes.Remove(node->index);
+			return true;
+		}
+	}*/
+
+	Node* FindNode(U& _key)
+	{
+		if (nodes.GetSize() == 0)
+		{
+			throw std::range_error("This container has no contents.");
+		}
+		Node* node;
+		int index = root_index;
+		while (index != Node::NIL)
+		{
+			node = &nodes[index];
+			if (_key == node->key)
+			{
+				return &node;
+			}
+			else if (_key <= node->key)
+			{
+				index = node->left_index;
+			}
+			else
+			{
+				index = node->right_index;
+			}
+		}
+		return nullptr;
 	}
 
 	/*Gets the sibling index of the node.*/
@@ -297,8 +421,8 @@ class RedBlackTree
 				subtree.*/
 				grand_parent.left_index = parent.right_index;
 				parent.right_index = grand_parent_index;
-	
-			
+
+
 				parent.color = Node::Color::black;
 				grand_parent.color = Node::Color::red;
 				root_candidate = parent_index;
@@ -324,7 +448,7 @@ class RedBlackTree
 				grand_parent.parent_index = index;
 				parent.parent_index = index;
 				/*Set the newly created left subtree of the grandparent
-				 and right subtree of the parent as the node's 
+				 and right subtree of the parent as the node's
 				 right subtree and left subtree respectively.*/
 				grand_parent.left_index = node.right_index;
 				parent.right_index = node.left_index;
@@ -340,7 +464,7 @@ class RedBlackTree
 		}
 		/*If the parent of the node is in the right subtree of the
 		grandparent's...*/
-		else if(parent_index == grand_parent.right_index)
+		else if (parent_index == grand_parent.right_index)
 		{
 			/*If the node is in the right subtree of the its
 			parent,shift the nodes left.*/
@@ -439,6 +563,24 @@ class RedBlackTree
 		}
 	}
 
+	Node* InOrderSuccessor(int index)
+	{
+		Node* node = &nodes[index];
+		if (node->right_index != Node::NIL)
+		{
+			node = &nodes[node->right_index];
+		}
+		else
+		{
+			return node;
+		}
+		while (node->left_index != Node::NIL)
+		{
+			node = &nodes[node->left_index];
+		}
+		return node;
+	}
+
 	/*Returns the node with the smallest key.*/
 	Node& Minimum()
 	{
@@ -461,6 +603,29 @@ class RedBlackTree
 		return *node;
 	}
 
+	void InOrderTraversalPrint(std::ostream& stream, int index)
+	{
+		if (index != Node::NIL)
+		{
+			Node& node = nodes[index];
+			InOrderTraversalPrint(stream, node.left_index);
+			stream << "(" << node.key << ", " << node.content << ") ";
+			InOrderTraversalPrint(stream, node.right_index);
+		}
+	}
+
+	void GetInOrderArray(std::tuple<T, U> arr[], int index, int& place)
+	{
+		if (index != Node::NIL)
+		{
+			Node& node = nodes[index];
+			GetInOrderArray(arr, node.left_index, place);
+			arr[place] = std::tuple<T, U>(node.content, node.key);
+			place++;
+			GetInOrderArray(arr, node.right_index, place);
+		}
+	}
+
 public:
 	class RBIterator : public std::iterator<
 		std::random_access_iterator_tag,
@@ -473,7 +638,7 @@ public:
 		RedBlackTree* tree;
 	public:
 		typedef RBIterator iterator;
-		iterator(Node* other,RedBlackTree* _tree)
+		iterator(Node* other, RedBlackTree* _tree)
 		{
 			ptr = other;
 			tree = _tree;
@@ -485,7 +650,11 @@ public:
 		iterator& operator++()
 		{
 			int last = tree->nodes.GetSize() - 1;
-			if (ptr != &tree->nodes[last] + 1)
+			if (ptr == &tree->nodes[last] + 1)
+			{
+				throw std::out_of_range("The iterator can't point further than End()!");
+			}
+			else
 			{
 				ptr++;
 			}
@@ -495,49 +664,87 @@ public:
 		iterator operator++(ptrdiff_t num)
 		{
 			int last = tree->nodes.GetSize() - 1;
-			if (ptr != &tree->nodes[last] + 1)
+			if (ptr == &tree->nodes[last] + 1)
+			{
+				throw std::out_of_range("The iterator can't point further than End()!");
+			}
+			else
 			{
 				ptr++;
 			}
-			return iterator(ptr - 1,tree);
+			return iterator(ptr - 1, tree);
 		}
 
 		iterator& operator--()
 		{
-			ptr--;
+			if (ptr == &tree->nodes[0])
+			{
+				throw std::out_of_range("The iterator can't point before Begin()!")
+			}
+			else
+			{
+				ptr--;
+			}
 			return *this;
 		}
 
 		iterator operator--(ptrdiff_t num)
 		{
-			ptr--;
-			return iterator(ptr + 1,tree);
+			if (ptr == &tree->nodes[0])
+			{
+				throw std::out_of_range("The iterator can't point before Begin()!")
+			}
+			else
+			{
+				ptr--;
+			}
+			return iterator(ptr + 1, tree);
 		}
 
-		iterator& operator+=(ptrdiff_t& num)
+		iterator& operator+=(ptrdiff_t num)
 		{
 			int last = tree->nodes.GetSize() - 1;
-			if (ptr != &tree->nodes[last] + 1)
+			if (ptr + num > &tree->nodes[last] + 1)
+			{
+				throw std::out_of_range("The iterator can't point further than End()!");
+			}
+			else
 			{
 				ptr += num;
 			}
 			return *this;
 		}
 
-		iterator& operator-=(ptrdiff_t& num)
+		iterator& operator-=(ptrdiff_t num)
 		{
-			ptr -= num;
+			if (ptr - num < &tree->nodes[0])
+			{
+				throw std::out_of_range("The iterator can't point before Begin()!");
+			}
+			else
+			{
+				ptr -= num;
+			}
 			return *this;
 		}
 
-		iterator& operator+(ptrdiff_t& num)
+		iterator& operator+(ptrdiff_t num)
 		{
-			return iterator(ptr + num,tree);
+			int last = nodes.GetSize() - 1;
+			if (ptr + num > &tree->nodes[last] + 1)
+			{
+				throw std::out_of_range("The iterator can't point further than End()!");
+			}
+			return iterator(ptr + num, tree);
 		}
 
-		iterator& operator-(ptrdiff_t& num)
+		iterator& operator-(ptrdiff_t num)
 		{
-			return iterator(ptr - num,tree);
+			if (ptr - num < &tree->nodes[0])
+			{
+				throw std::out_of_range("The iterator can't point before Begin()!");
+			}
+			return iterator(ptr - num, tree);
 		}
 
 		T& operator*()
@@ -582,34 +789,6 @@ public:
 	size_t GetSize()
 	{
 		return nodes.GetSize();
-	}
-	/*Returns the element that has the specified
-	key.*/
-	T Search(U _key)
-	{
-		if (nodes.GetSize() == 0)
-		{
-			throw std::range_error("This container has no contents.");
-		}
-		Node* node;
-		int index = root_index;
-		while (index != Node::NIL)
-		{
-			node = &nodes[index];
-			if (_key = node->key)
-			{
-				return node->content;
-			}
-			else if (_key <= node->key)
-			{
-				index = node->left_index;
-			}
-			else
-			{
-				index = node->right_index;
-			}
-		}
-		throw std::invalid_argument("There is no object with the key " + _key + " in this container.");
 	}
 
 	/*Returns the smallest key in the container.*/
@@ -695,7 +874,7 @@ public:
 
 	RBIterator Begin()
 	{
-		return RBIterator(&nodes[0],this);
+		return RBIterator(&nodes[0], this);
 	}
 
 	const RBIterator CBegin()
@@ -706,7 +885,7 @@ public:
 	RBIterator End()
 	{
 		int last = nodes.GetSize() - 1;
-		return RBIterator(&nodes[last] + 1,this);
+		return RBIterator(&nodes[last] + 1, this);
 	}
 
 	const RBIterator CEnd()
@@ -714,15 +893,54 @@ public:
 		return const End();
 	}
 
-	friend std::ostream& operator<<(std::ostream& stream, RedBlackTree tree)
+	/*Returns the element that has the specified
+	key.*/
+	iterator Find(U& _key)
 	{
-		/*Node& root = tree.nodes[tree.root_index];
-		for (int i = 0;i < tree.nodes.size();i++)
+		Node* node = Find(_key);
+		if (node == nullptr)
 		{
-			stream << tree.nodes[i].content << " ";
+			return End();
 		}
-		stream << std::endl;
-		return stream;*/
+		else
+		{
+			return iterator(node, this);
+		}
+	}
+
+	bool ContainsVal(T& val)
+	{
+		for (int i = 0;i < nodes.GetSize();i++)
+		{
+			if (nodes[i].content == val)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool ContainsKey(U& key)
+	{
+		return Find(key) != End();
+	}
+
+
+	friend std::ostream& operator<<(std::ostream& stream, RedBlackTree& tree)
+	{
+		tree.InOrderTraversalPrint(stream, tree.root_index);
+		return stream;
+	}
+
+	/*Gets an array of tuples sorted by the keys (O(N)).
+	NOTE: the array is allocated on heap,so call delete[]
+	when you're done using it.*/
+	std::tuple<T, U>* ToSortedArray()
+	{
+		std::tuple<T, U>* arr = new std::tuple<T, U>[GetSize()];
+		int place = 0;
+		GetInOrderArray(arr, root_index, place);
+		return arr;
 	}
 
 };
