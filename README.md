@@ -2,6 +2,10 @@
 # Collection-Implementations
 This contains implementations of containers I made on my own time.
 
+4/27/2018 - RedBlackTree(C++)
+------------------------
+I done away with the array based storage system I only did for educational purposes.Furthermore, I made code changes that shortened the length of some methods and reduced redundancy.Semester got busy,so I had to take a temporary break from personal projects.I plan to finish this container by the end of May(after finals/when I get back home).Also, duplicates are no longer allowed.
+
 3/17/2018 - RedBlackTree(C++)
 ------------------------
 I reworked the find method, added contains method, a method to print all the elements in order, and a method to return a sorted heap array of both the keys an the elements (of course,they are copied so that no change is done to the tree itself). I also reworked the iterator to do more preconditional checking and throw more exceptions when it fails.
