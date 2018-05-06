@@ -2,6 +2,14 @@
 # Collection-Implementations
 This contains implementations of containers I made on my own time.
 
+5/5/2018 - RedBlackTree(C++)
+------------------------
+I believe I have finally finished the tree. I added a remove method, and a get height method. Furthermore,there was 
+a significant change to the restructuring code for insertion that was crucial for the tree to be balanced. I made
+the mistake previously of thinking that the control variable of a switch statement could be evalutated multiple times.
+This mistake actually caused the tree to have instances of red parent-child pairs that served to imbalance the tree.
+This has been fixed.
+
 4/27/2018 - RedBlackTree(C++)
 ------------------------
 I done away with the array based storage system I only did for educational purposes.Furthermore, I made code changes that shortened the length of some methods and reduced redundancy.Semester got busy,so I had to take a temporary break from personal projects.I plan to finish this container by the end of May(after finals/when I get back home).Also, duplicates are no longer allowed.
