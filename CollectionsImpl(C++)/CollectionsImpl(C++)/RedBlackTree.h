@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <tuple>
+#include <algorithm>
 
 /*T is the data type of the contents the tree holds, while
 U is the data type of what the tree uses for node keys.*/
@@ -102,8 +103,7 @@ class RedBlackTree
 
 		bool HasOneChild()
 		{
-			return (left == nullptr && right != nullptr)
-				|| (left != nullptr && right == nullptr);
+			return (left == nullptr) ^ (right == nullptr);
 		}
 
 		bool isLeaf()
@@ -116,19 +116,23 @@ class RedBlackTree
 			return (left != nullptr && right != nullptr);
 		}
 
-		Node& GetLoneChild()
+		Node* GetLoneChild()
 		{
-			if (isLeaf())
+			/*if (isLeaf())
 			{
 				throw std::logic_error("Node has no children!");
-			}
-			if (left == nullptr)
+			}*/
+			if (right != nullptr)
 			{
 				return right;
 			}
-			else
+			else if(left != nullptr)
 			{
 				return left;
+			}
+			else
+			{
+				return nullptr;
 			}
 		}
 
@@ -182,114 +186,149 @@ class RedBlackTree
 		}
 	}
 
+	struct RemoveGroup
+	{
+		Node* node;
+		Node* sibling;
+		Node* parent;
+		typename Node::Color color;
+		RemoveGroup(Node* _node, Node* _sibling,Node* _parent, typename Node::Color _color)
+		{
+			node = _node;
+			sibling = _sibling;
+			parent = _parent;
+			color = _color;
+		}
+	};
+
 	///*Standard binary search tree remove that's done before
 	//RBD modifications.*/
-	//bool InitiallyDelete(U& key)
-	//{
-	//	Node* node = FindNode(key);
-	//	if (node == nullptr)
-	//	{
-	//		return false;
-	//	}
-	//	else
-	//	{
-	//		/*Do no extra operations if the node is a leaf.*/
-	//		/*If node has one child,simply replace that node
-	//		with its child.*/
-	//		if (node->HasOneChild())
-	//		{
-	//			Node& parent = nodes[node->parent_index];
-	//			Node& child = node->GetLoneChild();
-	//			if (parent.left_index == node->index)
-	//			{
-	//				parent.left_index = child.index;
-	//			}
-	//			else
-	//			{
-	//				parent.right_index = child.index;
-	//			}
-	//			child.parent_index = parent.index;
-	//		}
-	//		/*If node has two children,replace it with its
-	//		in order succesor.*/
-	//		else if (node->HasTwoChildren())
-	//		{
-	//			Node& parent = nodes[node->parent_index];
-	//			Node& child = InOrderSuccessor(node->index);
-	//			Node& sparent = nodes[child->parent_index];
-	//			child.left_index = node->left_index;
-	//			child.right_index = node->right_index;
-	//			if (parent.left_index == node->index)
-	//			{
-	//				parent.left_index = child.index;
-	//			}
-	//			else
-	//			{
-	//				parent.right_index = child.index;
-	//			}
-	//			child.parent_index = parent.index;
-	//			if (sparent.left_index == child.index)
-	//			{
-	//				sparent.left_index = Node::NIL;
-	//			}
-	//			else
-	//			{
-	//				sparent.right_index = Node::NIL;
-	//			}
-	//		}
-	//		nodes.Remove(node->index);//Delete node
-	//		return true;
-	//	}
-	//}
-
-	//void RestructureAfterDeletion(int index,int sibling_index, typename Node::Color deleted_color)
-	//{
-	//	if (deleted_color == Node::Color::red 
-	//		|| (index != Node::NIL && nodes[index].color == Node::Color::red))
-	//	{
-	//		if (index != Node::NIL)
-	//		{
-	//			nodes[index].color = Node::Color::red;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		Node& sibling = nodes[sibling_index];
-	//		if (sibling.color == Node::Color::black
-	//			&& !sibling.isLeaf()
-	//			)
-	//		{
-	//			if (sibling.right_index != Node::NIL
-	//				&& nodes[sibling.right_index].color
-	//				== Node::Color::red)
-	//			{
-	//				Rotate(sibling.right_index);
-	//			}
-	//			else if (sibling.left_index != Node::NIL
-	//				&& nodes[sibling.left_index].color
-	//				== Node::Color::red)
-	//			{
-	//				Rotate(sibling.left_index)
-	//			}
-	//			else
-	//			{
-	//				Recolor(sibling_index);
-	//			}			
-	//		}
-	//		else if (sibling.color == Node::Color::red)
-	//		{
-	//			Rotate(index);
-	//		}
-	//	}
-	//}
-
-
-	Node* FindNode(U& _key)
+	RemoveGroup InitiallyDelete(Node* node)
 	{
-		if (GetSize() == 0)
+		typename Node::Color deleted_color = node->color;
+		size--;
+		/*If node has one child,simply replace that node
+		with its child.*/
+		if (node->isLeaf())
 		{
-			throw std::range_error("This container has no contents.");
+			Node* parent = node->parent;
+			if(node->parent != nullptr)
+			node->parent->RemoveChild(node);
+			delete node;
+			Node* sibling = (parent == nullptr || parent->isLeaf()) 
+				? nullptr : parent->GetLoneChild();
+			return RemoveGroup(nullptr, sibling,parent, deleted_color);
 		}
+		else if (node->HasOneChild())
+		{
+			Node* parent = node->parent;
+			Node* child = node->GetLoneChild();
+			if (parent != nullptr)
+			{
+				parent->RemoveChild(node);
+				child->SetParent(parent);
+			}
+			else
+			{
+				root = child;
+				child->parent = nullptr;
+			}
+			node->left = nullptr;
+			node->right = nullptr;
+			delete node;
+			return RemoveGroup(child, GetNodeSibling(child),parent, deleted_color);
+		}
+		/*If node has two children,replace it with its
+		in order succesor.*/
+		else if (node->HasTwoChildren())
+		{
+			Node* successor = InOrderSuccessor(node);
+			node->key = successor->key;
+			node->content = successor->content;
+			return InitiallyDelete(successor);
+		}
+	}
+
+	void RestructureAfterDeletion(Node* node,Node* sibling,Node* parent, typename Node::Color deleted_color)
+	{
+		if (deleted_color == Node::Color::red || (node != nullptr && node->color == Node::Color::red))
+		{
+			if(node != nullptr)
+			{
+				node->color = Node::Color::black;
+			}
+		}
+		else
+		{
+			typename Node::Color color = sibling == nullptr
+				? Node::Color::black : sibling->color;
+			switch (color)
+			{
+				case Node::Color::black:
+				{
+					if (sibling != nullptr && ((sibling->left != nullptr
+						&& sibling->left->color == Node::Color::red)
+						|| (sibling->right != nullptr
+							&& sibling->right->color == Node::Color::red)))
+					{
+						Node* child = (sibling->right != nullptr
+							&& sibling->right->color == Node::Color::red)
+							? sibling->right : sibling->left;
+						Rotate(child);
+						break;
+					}
+					else
+					{
+						if (sibling != nullptr)
+						{
+							sibling->color = Node::Color::red;
+						}
+						node = parent;
+						if (node == nullptr)
+						{
+							break;
+						}
+						parent = node->parent != nullptr ? node->parent : parent;
+						if (node->color == Node::Color::red || node == root)
+						{
+							node->color = Node::Color::black;
+							break;
+						}
+						sibling = GetNodeSibling(node);
+					}
+				}
+				case Node::Color::red:
+				{	
+					parent->RemoveChild(sibling);
+					if (parent->parent != nullptr)
+					{
+						parent->parent->SetChild(sibling);
+					}
+					if (sibling->key > parent->key)
+					{
+						FillLeftSubtree(sibling, parent);
+					}
+					else
+					{
+						FillRightSubtree(sibling, parent);
+					}
+				    if (parent == root)
+					{
+						root = sibling;
+					}
+					sibling->color = Node::Color::black;
+					color = sibling->color;
+					parent->color = Node::Color::red;
+					sibling = node == nullptr ? parent->GetLoneChild()
+						: GetNodeSibling(node);
+				}
+			}
+		}
+	}
+
+
+	Node* FindNode(const U& _key)
+	{
 		Node* node = root;
 		while (node != nullptr)
 		{
@@ -333,40 +372,65 @@ class RedBlackTree
 	{
 		//std::cout << "Restructuring..." << std::endl;
 		Node* parent = node->parent;
-		switch (parent->color)
+		typename Node::Color color = parent->color;
+		while (true)
 		{
-		case Node::Color::black:
-			break;
-		case Node::Color::red:
-			Node* uncle = GetNodeSibling(parent);
-			if (uncle == nullptr
-				|| uncle->color == Node::Color::black)
+			switch (color)
 			{
-				Rotate(node);
-				break;
-			}
-			/*Note,when the color of the sibling is red,
-			The switch statement is continued to ensure
-			that recolorings that cause a parent and
-			child to both be red are dealt with.
-			The node is set to the grandparent, for
-			the grandparent and parent cases are already
-			resolved.*/
-			else if (uncle->color == Node::Color::red)
-			{
-				Recolor(node);
-				Node* grand_parent = parent->parent;
-				node = grand_parent;
+			case Node::Color::black:
+				return;
+			case Node::Color::red:
+				Node* uncle = GetNodeSibling(parent);
+				if (uncle == nullptr
+					|| uncle->color == Node::Color::black)
+				{
+					Rotate(node);
+					//violation(root);
+					return;
+				}
+				/*Note,when the color of the sibling is red,
+				The switch statement is continued to ensure
+				that recolorings that cause a parent and
+				child to both be red are dealt with.
+				The node is set to the grandparent, for
+				the grandparent and parent cases are already
+				resolved.*/
+				else if (uncle->color == Node::Color::red)
+				{
+					Recolor(node);
+					Node* grand_parent = parent->parent;
+					node = grand_parent;
+					parent = node->parent;
+					color = parent == nullptr ?
+						Node::Color::black : parent->color;					
+					break;
+				}
 			}
 		}
 	}
 
-	void Shift(Node* node)
+	void violation(Node* node)
 	{
-		Node* parent = node->parent;
-		Node* grand_parent = parent->parent;
-		Node* great_parent = grand_parent->parent;
+		if (node == nullptr)
+		{
+			return;
+		}
+		if (node->parent != nullptr && node->parent->color == Node::Color::red
+			&& node->color == Node::Color::red)
+		{
+			std::cout << "Violation!" << std::endl;
+		}
+		violation(node->left);
+		violation(node->right);
+	}
 
+	void Shift(Node* node,Node* _parent = nullptr,Node* _grand_parent = nullptr)
+	{
+		Node* parent = _parent == nullptr 
+			? node->parent : _parent;
+		Node* grand_parent = _grand_parent == nullptr 
+			? parent->parent : _grand_parent;
+		Node* great_parent = grand_parent->parent;
 		parent->SetParent(great_parent);
 		if (node->key <= parent->key)
 		{
@@ -394,6 +458,16 @@ class RedBlackTree
 	{
 		Node* parent = node->parent;
 		Node* grand_parent = parent->parent;
+		if (node->key > parent->key)
+		{
+			parent->SetChild(node->left);
+			grand_parent->SetChild(node->right);
+		}
+		else
+		{
+			parent->SetChild(node->right);
+			grand_parent->SetChild(node->left);
+		}
 		node->SetParent(grand_parent->parent);
 		parent->SetParent(node);
 		grand_parent->SetParent(node);
@@ -403,12 +477,13 @@ class RedBlackTree
 	node.*/
 	void Rotate(Node* node)
 	{
+		//std::cout << "Rotating..." << std::endl;
 		Node* parent = node->parent;
 		Node* grand_parent = parent->parent;
 		Node* root_candidate = nullptr;
 		if ((grand_parent->right == parent && parent->right == node)
 			|| (grand_parent->left == parent && parent->left == node))
-		{			
+		{
 			Shift(node);
 			parent->color = Node::Color::black;
 			grand_parent->color = Node::Color::red;
@@ -422,7 +497,7 @@ class RedBlackTree
 			root_candidate = node;
 		}
 		if (root == grand_parent && root_candidate != nullptr)
-		{ 
+		{
 			root = root_candidate;
 		}
 	}
@@ -435,9 +510,13 @@ class RedBlackTree
 		Node* parent = node->parent;
 		Node* uncle = GetNodeSibling(parent);
 		Node* grand_parent = parent->parent;
-		SwitchColor(uncle);
+		uncle->color = Node::Color::black;
+		parent->color = Node::Color::black;
+		if (grand_parent != root)
+		grand_parent->color = Node::Color::red;
+		/*SwitchColor(uncle);
 		SwitchColor(parent);
-		SwitchColor(grand_parent);
+		SwitchColor(grand_parent);*/
 	}
 
 	/*Switches the color of the node.*/
@@ -527,6 +606,17 @@ class RedBlackTree
 		GetInOrderPointerArray(arr, node->right, place);
 	}
 
+	int GetHeight(Node* node)
+	{
+		if (node == nullptr)
+		{
+			return -1;
+		}
+		int lhs = GetHeight(node->left);
+		int rhs = GetHeight(node->right);
+		return std::max(lhs, rhs) + 1;
+	}
+
 public:
 
 	~RedBlackTree()
@@ -534,7 +624,7 @@ public:
 		Clear();
 	}
 
-	class RBIterator : public std::iterator<
+	static class RBIterator : public std::iterator<
 		std::random_access_iterator_tag,
 		T,
 		std::ptrdiff_t,
@@ -545,8 +635,9 @@ public:
 		RedBlackTree* tree;
 	public:
 		typedef RBIterator iterator;
-		iterator(Node* other, RedBlackTree* _tree, int _index = -1)
+		RBIterator(Node* other, RedBlackTree* _tree, int _index = -1)
 		{
+			tree = _tree;
 			if (_tree->sorted_pointers == nullptr)
 			{
 				_tree->sorted_pointers = new Node*[_tree->GetSize()];
@@ -568,10 +659,7 @@ public:
 			{
 				index = _index;
 			}
-			tree = _tree;
 		}
-		iterator(const iterator& other) = default;
-		iterator(iterator&& other) = default;
 		~RBIterator() = default;
 
 		iterator& operator++()
@@ -681,12 +769,12 @@ public:
 
 		bool operator==(const iterator& other)
 		{
-			if (other.index == other.tree->GetSize()
-				^ index == tree->GetSize())
+			if ((other.index == other.tree->GetSize())
+				^ (index == tree->GetSize()))
 			{
 				return false;
 			}
-			else if (index == tree->GetSize())
+			else if (index == tree->GetSize() && other.tree->GetSize() == other.index)
 			{
 				return true;
 			}
@@ -816,7 +904,7 @@ public:
 		return Maximum()->content;
 	}
 
-	/*Inserts the element into the tree.Doesn't do anything if the key 
+	/*Inserts the element into the tree.Doesn't do anything if the key
 	 is already present in the tree.*/
 	void Insert(T element, U _key)
 	{
@@ -846,14 +934,39 @@ public:
 		}
 	}
 
-	/*bool Remove(U& key)
+	/*Removes the param key and its associated object from
+	the tree.Returns false if the key wasn't present in the tree.*/
+	bool Remove(const U& key)
 	{
-		bool result = InitiallyDelete(key);
-		if (result)
+		Node* node = FindNode(key);
+		if (node == nullptr)
 		{
-			RestructureAfterDeletion()
+			return false;
 		}
-	}*/
+		else if (node == root && GetSize() == 1)
+		{
+			Clear();
+		}
+		else
+		{
+			if (sorted_pointers != nullptr)
+			{
+				delete sorted_pointers;
+				sorted_pointers = nullptr;
+			}
+			RemoveGroup r = InitiallyDelete(node);
+			if(GetSize() > 1)
+			RestructureAfterDeletion(r.node, r.sibling,r.parent, r.color);
+		}
+		return true;
+	}
+
+	/*Gets the height of the tree.
+	Returns -1 if there is no root.*/
+	int GetHeight()
+	{
+		return GetHeight(root);
+	}
 
 	/*Clears the tree of all its nodes.*/
 	void Clear()
@@ -893,7 +1006,7 @@ public:
 
 	/*Returns the element that has the specified
 	key.*/
-	iterator Find(U& _key)
+	iterator Find(const U& _key)
 	{
 		Node* node = FindNode(_key);
 		if (node == nullptr)
@@ -919,7 +1032,7 @@ public:
 	}
 
 	/*Returns whether a key is present in the tree.*/
-	bool ContainsKey(U& key)
+	bool ContainsKey(const U& key)
 	{
 		return Find(key) != End();
 	}
