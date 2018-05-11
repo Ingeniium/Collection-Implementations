@@ -2,6 +2,12 @@
 # Collection-Implementations
 This contains implementations of containers I made on my own time.
 
+5/10/2018 - PriorityQueue(C#)
+------------------------
+I decided to revisit my priority queue. The previous implementation was had a O(N) Dequeue to make up for
+the O(1) Enqueue it had. I wanted to try writing a heap (for the purpose of expanding my knowledge and understanding)
+, so now both operations are Log(n) at their worst.
+
 5/5/2018 - RedBlackTree(C++)
 ------------------------
 I believe I have finally finished the tree. I added a remove method, and a get height method. Furthermore,there was 
