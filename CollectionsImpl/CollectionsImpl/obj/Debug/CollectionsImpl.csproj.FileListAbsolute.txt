@@ -1,6 +1,0 @@
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\obj\Debug\CollectionsImpl.csprojResolveAssemblyReference.cache
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\obj\Debug\CollectionsImpl.csproj.CoreCompileInputs.cache
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\bin\Debug\CollectionsImpl.exe
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\bin\Debug\CollectionsImpl.pdb
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\obj\Debug\CollectionsImpl.exe
-C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl\CollectionsImpl\obj\Debug\CollectionsImpl.pdb
