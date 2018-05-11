@@ -1,0 +1,5 @@
+C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(CSharp)\CollectionsImpl(CSharp)\obj\Debug\CollectionsImpl(CSharp).csproj.CoreCompileInputs.cache
+C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(CSharp)\CollectionsImpl(CSharp)\bin\Debug\CollectionsImpl(CSharp).exe
+C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(CSharp)\CollectionsImpl(CSharp)\bin\Debug\CollectionsImpl(CSharp).pdb
+C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(CSharp)\CollectionsImpl(CSharp)\obj\Debug\CollectionsImpl(CSharp).exe
+C:\Users\andre\OneDrive\Documents\Visual Studio 2017\Projects\CollectionsImpl(CSharp)\CollectionsImpl(CSharp)\obj\Debug\CollectionsImpl(CSharp).pdb
